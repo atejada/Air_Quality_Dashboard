@@ -7,6 +7,13 @@ Clone the repo and create an .env file with the following from [Air Quality Open
 API_TOKEN = "YOUR_TOKEN"
 ```
 
+Install the following packages:
+
+```
+pip3 install streamlit
+pip3 install pandas
+```
+
 Run with 
 
 ```
