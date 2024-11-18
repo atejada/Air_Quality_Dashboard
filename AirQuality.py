@@ -48,7 +48,7 @@ top_df = pd.DataFrame({'Flags':flags,'Cities':cities,'Aqis':aqis})
 
 def condition(x):
     if 0 <= x < 50:
-        return 'background-color : green'	
+        return 'background-color : green'   
     if 51 <= x < 100:
         return 'background-color : yellow'
     elif 101 <= x < 150:
@@ -78,7 +78,7 @@ def emoji(x):
     else:
         return ''
 
-df_styled = top_df.style.map(lambda x: condition(x), subset=['Aqis'])
+df_styled = top_df.style.map(lambda x: condition(int(x)), subset=['Aqis'])
 
 st.set_page_config(layout="wide")
 colT1,colT2 = st.columns([2,8])
@@ -102,11 +102,16 @@ with col2:
         location = "here"
     url = "https://api.waqi.info/feed/" + quote(location) + "/?token=" + os.environ.get("API_TOKEN")
     with urllib.request.urlopen(url) as response:
-        json_response = json.loads(response.read())	
-    st.metric("Indice de Calidad del Aire", f"{json_response['data']['aqi']}",f"{json_response['data']['city']['name']}")
+        json_response = json.loads(response.read()) 
+    
+    if json_response['status'] != 'error':
+        if(json_response['data']['aqi'] == '-'):
+            json_response['data']['aqi'] = 0    
+        
+        st.metric("Indice de Calidad del Aire", f"{json_response['data']['aqi']}",f"{json_response['data']['city']['name']}")
  
-    df = pd.DataFrame([[json_response['data']['city']['geo'][0], json_response['data']['city']['geo'][1]]], columns=["lat","lon"])
-    st.map(df)
-    st.image(emoji(json_response['data']['aqi']), caption="")
-
- 
+        df = pd.DataFrame([[json_response['data']['city']['geo'][0], json_response['data']['city']['geo'][1]]], columns=["lat","lon"])
+        st.map(df)
+        st.image(emoji(json_response['data']['aqi']), caption="")
+    else:
+        st.error('Estación desconocida', icon="🚨")
